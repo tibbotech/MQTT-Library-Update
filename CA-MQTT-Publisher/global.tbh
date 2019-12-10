@@ -1,0 +1,21 @@
+'DEFINES-------------------------------------------------------------
+
+#define MQTT_DEBUG_PRINT 1
+#define MQTT_APP_CLIENT_ID "PUBLISHER"
+#define MQTT_LARGE_PACKETS 1
+
+const MQTT_NAME="PUBLISHER"					'<<<<<<<<====== MQTT server login name
+const MQTT_PASSWORD ="ABCDEFGDDD"			'<<<<<<<<====== MQTT server login password
+const OWN_IP="192.168.1.245"				'<<<<<<<<====== This is the IP address of this device
+const PUBLISH_DEMO_GATEWAY="192.168.1.1"	'<<<<<<<<====== Gateway IP address
+const MQTT_SERVER_HOST="192.168.1.170"		'<<<<<<<<====== MQTT server IP
+
+const PAT_GREEN_BLINKING=	"G-~"			'opening TCP link to the server
+const PAT_GREEN_ON=			"G~"			'server connection established
+
+'INCLUDES------------------------------------------------------------
+include "sock\trunk\sock.tbh"
+include "mqtt\trunk\mqtt.tbh"
+
+'DECLARATIONS--------------------------------------------------------
+declare connect_lost as no_yes

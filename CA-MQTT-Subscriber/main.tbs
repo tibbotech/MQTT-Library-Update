@@ -1,0 +1,59 @@
+include "global.tbh"
+dim connect_lost as no_yes
+
+'====================================================================
+sub on_sys_init()
+	
+	net.ip=OWN_IP
+	net.gatewayip=SUBSCRIBE_DEMO_GATEWAY
+	net.netmask="255.255.255.0"
+
+	pat.play(PAT_GREEN_BLINKING,PL_PAT_CANINT)
+
+	mqtt_start()
+	if mqtt_connect(MQTT_SERVER_HOST,1883,MQTT_NAME,MQTT_PASSWORD,30)=NG then
+		'In here, we cannot make a tcp link to the host ...
+		connect_lost=YES
+	end if
+end sub
+
+sub on_sys_timer()
+	if connect_lost=YES then
+		'Try to establish the tcp link with mqtt host ...
+		if mqtt_reconnect()=OK then
+			connect_lost=NO
+		end if
+	end if
+	mqtt_proc_timer()
+end sub
+
+sub callback_mqtt_connect_ok()
+	pat.play(PAT_GREEN_ON,PL_PAT_CANINT)
+	mqtt_sub("BYTES/#",QOS_AT_LEAST_ONCE)
+end sub
+
+sub callback_mqtt_notif(byref topic as string,byref data as string,remaining_bytes as dword)
+
+	dim pos as byte
+	pos=instr(1,topic,"/",1)
+	
+	dim x as string
+	x=mid(topic,1,pos-1)
+
+	sys.debugprint("Topic: " + topic + "\r\n")
+	sys.debugprint("Data: " + data + "\r\n")
+	sys.debugprint("Remaining Bytes: " + str(remaining_bytes) + "\r\n")
+
+end sub
+
+sub on_sock_data_arrival()
+	mqtt_proc_data()
+end sub
+
+sub  callback_mqtt_sub_ok()
+end sub
+
+sub callback_mqtt_connect_lost()
+	pat.play(PAT_GREEN_BLINKING,PL_PAT_CANINT)
+	connect_lost=YES
+end sub

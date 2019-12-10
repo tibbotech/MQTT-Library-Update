@@ -1,0 +1,74 @@
+include "global.tbh"
+dim connect_lost as no_yes=NO
+
+'====================================================================
+sub on_sys_init()
+	net.ip=OWN_IP
+	net.gatewayip=PUBLISH_DEMO_GATEWAY
+	net.netmask="255.255.255.0"
+
+	pat.play(PAT_GREEN_BLINKING,PL_PAT_CANINT)
+
+	mqtt_start()
+	if mqtt_connect(MQTT_SERVER_HOST,1883,MQTT_NAME,MQTT_PASSWORD,60)=NG then
+		'In here, we cannot make a tcp link to the host ...
+		connect_lost=YES
+	end if
+end sub
+
+sub on_sys_timer()
+	if connect_lost=YES then
+		'Try to establish the tcp link with mqtt host ...
+		if mqtt_reconnect()=OK then
+			connect_lost=NO
+		end if
+	end if
+	mqtt_proc_timer()
+end sub
+
+sub on_sock_data_arrival()
+	mqtt_proc_data()
+end sub
+
+sub on_button_pressed()	
+	
+	dim s1, s2, s3, s4, s5, s6 as string
+	dim i as byte=0
+	for i=0 to 254
+		s1=s1+"A"
+		s2=s2+"B"
+		s3=s3+"C"
+		s4=s4+"D"
+		s5=s5+"E"
+		s6=s6+"F"
+	next i
+	
+	mqtt_start_publish("BYTES/1020",QOS_EXACTLY_ONCE,(255*4))
+	mqtt_continue_publish(s1)
+	mqtt_continue_publish(s2)
+	mqtt_continue_publish(s3)
+	mqtt_continue_publish(s4)
+	mqtt_start_publish("BYTES/510",QOS_EXACTLY_ONCE,(255*2))
+	mqtt_continue_publish(s5)
+	mqtt_continue_publish(s6)
+	mqtt_start_publish("BYTES/1",QOS_EXACTLY_ONCE,(1))
+	mqtt_continue_publish("G")
+
+end sub
+
+sub callback_mqtt_connect_ok()
+	pat.play(PAT_GREEN_ON,PL_PAT_CANINT)
+end sub
+
+sub callback_mqtt_connect_lost()
+	pat.play("-",PL_PAT_CANINT)
+	connect_lost=YES
+end sub
+
+sub callback_mqtt_notif(byref topic as string,byref data as string,remaining_bytes as dword)
+end sub
+
+sub callback_mqtt_sub_ok()
+
+end sub
+
