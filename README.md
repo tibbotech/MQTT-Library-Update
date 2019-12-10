@@ -33,5 +33,5 @@ To receive:
 
    - <b>topic</b> - Name of the topic received
    - <b>data</b> - Data received
-   - <b>length</b> - Total number of bytes remaining to be received. When this value is 0, the entire packet has been sent.
+   - <b>length</b> - Total number of bytes remaining to be received. When this value is 0, the entire packet has been received.
      	
