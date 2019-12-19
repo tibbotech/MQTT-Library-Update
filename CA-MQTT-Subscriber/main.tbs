@@ -11,15 +11,15 @@ sub on_sys_init()
 	pat.play(PAT_GREEN_BLINKING,PL_PAT_CANINT)
 
 	mqtt_start()
-	if mqtt_connect(MQTT_SERVER_HOST,1883,MQTT_NAME,MQTT_PASSWORD,30)=NG then
+	if mqtt_connect(MQTT_SERVER_HOST,MQTT_PORT,MQTT_NAME,MQTT_PASSWORD,30)=NG then
 		'In here, we cannot make a tcp link to the host ...
 		connect_lost=YES
 	end if
+	
 end sub
 
 sub on_sys_timer()
 	if connect_lost=YES then
-		'Try to establish the tcp link with mqtt host ...
 		if mqtt_reconnect()=OK then
 			connect_lost=NO
 		end if
@@ -29,7 +29,8 @@ end sub
 
 sub callback_mqtt_connect_ok()
 	pat.play(PAT_GREEN_ON,PL_PAT_CANINT)
-	mqtt_sub("BYTES/#",QOS_AT_LEAST_ONCE)
+	mqtt_sub("1/A",QOS_AT_LEAST_ONCE)
+	mqtt_sub("2/B",QOS_AT_LEAST_ONCE)
 end sub
 
 sub callback_mqtt_notif(byref topic as string,byref data as string,remaining_bytes as dword)

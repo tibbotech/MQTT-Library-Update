@@ -5,6 +5,10 @@
 	#define MQTT_LARGE_PACKETS 0
 #endif
 
+#ifndef MQTT_SSL
+	#define MQTT_SSL 0
+#endif
+
 #ifndef MQTT_DEBUG_PRINT
 	#define MQTT_DEBUG_PRINT 0
 #endif
@@ -14,11 +18,11 @@
 #endif
 
 #ifndef MQTT_RX_BUFF
-	#define MQTT_RX_BUFF 1
+	#define MQTT_RX_BUFF 16
 #endif
 
 #ifndef MQTT_TX_BUFF
-	#define MQTT_TX_BUFF 1
+	#define MQTT_TX_BUFF 16
 #endif
 
 #ifndef MQTT_APP_CLIENT_ID
@@ -79,6 +83,10 @@ declare sub callback_mqtt_connect_lost()
 declare sub callback_mqtt_sub_ok()
 'MQTT callback procedure. Must be implemented elsewhere in the user's program.
 'Called on the subscriber when the MQTT server confirms the requested subscription.
+
+declare sub sock_setdata(byref txdata as string)
+declare function sock_getdata(byref maxinplen as word) as string
+declare function sock_peekdata(byref maxinplen as word) as string
 
 #if MQTT_LARGE_PACKETS 
 

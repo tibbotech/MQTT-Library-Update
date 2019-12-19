@@ -1,11 +1,11 @@
 [project]
 version=1
-platform=TPP3W(G2)
+platform=TPP2W(G2)
 src_lib_ver=2_01_03
 name=mqtt_subscriber
 output=mqtt_subscriber.tpc
 debug=on
-defines= /dLCD_TYPE=SOLOMON_SSD1963 /dOBJECT_LCD=LCD_DISABLED /dOBJECT_FD=FD_ENABLED /dOBJECT_KP=KP_ENABLED /dOBJECT_WLN=WLN_ENABLED
+defines= /dLCD_TYPE=SOLOMON_SSD1963 /dMQTT_DEBUG_PRINT=1 /dOBJECT_LCD=LCD_DISABLED /dOBJECT_FD=FD_ENABLED /dOBJECT_KP=KP_ENABLED /dOBJECT_WLN=WLN_ENABLED
 transport=udp_winpcap
 [address1]
 platform=TPP3W
@@ -22,11 +22,11 @@ address=
 [address4]
 platform=TPP2W(G2)
 transport=udp_winpcap
-address=0.36.119.82.228.6
+address=0.36.119.82.149.40
 [address5]
 platform=TPP3W(G2)
 transport=udp_winpcap
-address=0.12.22.33.56.225
+address=0.36.119.82.149.40
 [file1]
 path=main.tbs
 type=basic
