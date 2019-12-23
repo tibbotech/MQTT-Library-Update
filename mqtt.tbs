@@ -540,7 +540,6 @@ end function
 			mqtt_debug_print("ERROR: Previous MQTT packet not fully sent. " + str(mqtt_packet_length) + " bytes remaining.")
 			#endif
 			mqtt_packet_length=0
-			connect_lost=YES
 			exit sub
 		end if
 		mqtt_packet_length=length
@@ -602,7 +601,6 @@ end function
 				mqtt_debug_print("ERROR: Number of bytes being sent exceeds number set in header")
 			#endif
 			mqtt_packet_length=0
-			connect_lost=YES
 			exit sub
 		end if
 		
