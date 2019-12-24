@@ -26,8 +26,7 @@ const DISCONNECT 	=&hE0
 
 'mqtt protocol string
 const MQTT_LEVEL	=&h04
-'const MQTT_PROTOCOL	="MQTT"
-const MQTT_PROTOCOL="MQIsdp"
+const MQTT_PROTOCOL	="MQTT"
 const MQTT_CLIENT_ID= MQTT_APP_CLIENT_ID
 
 enum mqtt_state
@@ -75,7 +74,6 @@ sub mqtt_start()
 	sock.num=mqtt_sock_num
 	sock.protocol=PL_SOCK_PROTOCOL_TCP
 	sock.inconmode = PL_SOCK_INCONMODE_ANY_IP_ANY_PORT
-	'sock.splittcppackets=YES
 	sock.gendataarrivalevent=YES
 	sock.reconmode=PL_SOCK_RECONMODE_3
 	sock.connectiontout=0
@@ -105,7 +103,7 @@ function mqtt_get_packet_identifier() as string(2)
 	mqtt_get_packet_identifier = chr(mqtt_packet_identifier/256)+chr(mqtt_packet_identifier mod 256)
 end function
 
-function mqtt_call_connect() as pl_sock_state
+function mqtt_call_connect() as pl_sock_state_simple
 	
 	const WAIT_CONNECT_TIMEOUT=2000
 	dim tmr as dword		
@@ -138,12 +136,9 @@ function mqtt_call_connect() as pl_sock_state
 		tmr=sys.timercountms
 		while sys.timercountms-tmr<18000 and sock.state<>PL_TLS_EST		
 		wend
-		mqtt_call_connect = sock.state
-#else
-do
 		mqtt_call_connect = sock.statesimple
-		t_counter = t_counter - 1
-	loop while (mqtt_call_connect <> sock.statesimple) and (t_counter > 0)
+#else
+		mqtt_call_connect = sock.statesimple
 #endif
 end function
 
@@ -156,7 +151,7 @@ sub mqtt_send_login()
 		buf=chr(&h0)+chr(len(MQTT_PROTOCOL))+MQTT_PROTOCOL+chr(MQTT_LEVEL)+chr(&hc2)+chr(0)+chr(&h3c)+chr(0)+chr(len(MQTT_CLIENT_ID))+MQTT_CLIENT_ID + chr(0)+chr(len(mqtt_user)) + mqtt_user + chr(0)+chr(len(mqtt_pw)) + mqtt_pw
 	end if
 	buf=chr(CONNECT)+mqtt_build_remaining_length(len(buf)) + buf
-	buf=chr(CONNECT)+chr(14+len(mqtt_user)+len(mqtt_pw)+1)+chr(&h0)+chr(&h6)+MQTT_PROTOCOL+chr(&h3)+chr(&h2)+chr(0)+chr(&h3c)+chr(0)+chr(&h11)+mqtt_user+chr(&h2f)+mqtt_pw
+
 	sock_setdata(buf)
 	sock.send	
 end sub
@@ -182,11 +177,16 @@ function mqtt_connect(byref dst_ip as string,dst_port as word,byref user as stri
 	mqtt_pw=password
 
 	mqtt_keep_alive_timer=keep_alive*2  ' half second * 2
-	dim connection_status as pl_sock_state=mqtt_call_connect()
-	if (connection_status = PL_TLS_EST) then
-		mqtt_send_login()		
+	mqtt_call_connect()
+#if MQTT_SSL	
+	if (sock.state = PL_TLS_EST) then
+#else
+	if (sock.statesimple= PL_SSTS_EST) then
+#endif
+		mqtt_send_login()
 		mqtt_connect = OK
 	end if
+
 	
 end function
 
@@ -202,17 +202,22 @@ function mqtt_reconnect() as ok_ng
 		exit function
 	end if
 
-	sock.num=mqtt_sock_num
-		
+	sock.num=mqtt_sock_num		
 	if (sock.statesimple = PL_SSTS_CLOSED) then
 		sock.close
-		mqtt_call_connect()
 	end if
 	
+	mqtt_call_connect()
+	
+#if MQTT_SSL	
+	if (sock.state = PL_TLS_EST) then
+#else
 	if (sock.statesimple = PL_SSTS_EST) then
-		mqtt_send_login()
+#endif
+		mqtt_send_login()		
 		mqtt_reconnect = OK
 	end if
+
 	
 end function
 
@@ -518,7 +523,7 @@ function sock_getdata(byref maxinplen as word) as string
 #endif
 end function
 
-#if MQTT_LARGE_PACKETS 
+#if MQTT_LARGE_PACKETS
 	
 	sub mqtt_start_publish(byref topic as string, qos as en_qos_choices, length as dword)
 	'API procedure, starts the procedure of publishing to the MQTT server (broker). Must be called before calling mqtt_continue_publish().
@@ -627,6 +632,5 @@ end function
 		sock.num = current_sock
 
 	end sub
-
 
 #endif
