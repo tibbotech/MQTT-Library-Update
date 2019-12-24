@@ -419,8 +419,8 @@ sub mqtt_proc_data()
 						#endif
 						dim ack as string = mid(buf,topic_length+3,2)
 						dim topic as string = mid(buf,3,topic_length)
-						dim st as string  = sock_getdata(topic_length+fixed_header_length+4)
-						length=length-topic_length-4	
+						dim st as string  = sock_getdata(topic_length+fixed_header_length+2)
+						length=length-topic_length-2	
 						tmr=sys.timercountms
 						while length>0 and sys.timercountms-tmr<MQTT_TIMEOUT
 							dim length_word as word = length
